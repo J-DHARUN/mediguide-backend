@@ -2,15 +2,19 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from prescription_nlp import doctr_extract, group_prescription_blocks, parse_line
 
-app = Flask("MediGuide AI")
+app = Flask(__name__)
 CORS(app)
 
-@app.route("/parse", methods=["POST"])
-def parse_prescription():
-    if "image" not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
+@app.route("/")
+def home():
+    return "✅ MediGuide AI backend is live!"
 
-    file = request.files["image"]
+@app.route("/process", methods=["POST"])
+def parse_prescription():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
     temp_path = "temp_upload.png"
     file.save(temp_path)
 
@@ -21,6 +25,3 @@ def parse_prescription():
         return jsonify(parsed)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
